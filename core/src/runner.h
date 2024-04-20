@@ -40,6 +40,7 @@ enum {
 
 
 struct config {
+    // 系统调用限制
     int max_cpu_time;
     int max_real_time;
     long max_memory;
@@ -47,6 +48,8 @@ struct config {
     int max_process_number;
     long max_output_size;
     int memory_limit_check_only;
+
+    // 编译执行参数
     char *exe_path;
     char *input_path;
     char *output_path;
