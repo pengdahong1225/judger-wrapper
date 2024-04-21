@@ -8,11 +8,9 @@
 #include <string>
 #include <vector>
 
-using int64 = int64_t;
-using int32 = int32_t;
 
 #define JUDGER_WORKSPACE_BASE "/judger/run"
-#define LOG_BASE "/log"
+#define LOG_BASE "/log/compile.log"
 
 static std::vector<std::string> DefaultEnv{"LANG=en_US.UTF-8", "LANGUAGE=en_US:en", "LC_ALL=en_US.UTF-8"};
 
@@ -20,17 +18,17 @@ static std::vector<std::string> DefaultEnv{"LANG=en_US.UTF-8", "LANGUAGE=en_US:e
 typedef struct CompileConfig {
     std::string src_name;
     std::string exe_name;
-    int64 max_cpu_time;
-    int64 max_real_time;
-    int64 max_memory;
-    std::string compile_command;
+    int max_cpu_time;
+    int max_real_time;
+    int max_memory;
+    std::string compile_command; // 编译命令
 } CompileConfig;
 
 typedef struct RunConfig {
     std::string command;
     std::string seccomp_rule;
     std::vector<std::string> env;
-    int32 memory_limit_check_only;
+    int memory_limit_check_only;
 } RunConfig;
 
 typedef struct LangConfig {
