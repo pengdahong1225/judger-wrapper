@@ -29,7 +29,7 @@ struct result JudgeWrapper::judge(LangConfig *language_config, std::string &src,
     auto exe_path = compile(&compile_config, src_path, work_dir);
 
     // 解析测试用例json，保存到文件中
-
+    
 }
 
 void JudgeWrapper::writeUtf8ToFile(const std::string &filePath, const std::string &content) {
