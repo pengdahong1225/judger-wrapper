@@ -13,11 +13,13 @@ include_directories(core)
 include_directories(core/src)
 include_directories(wrapper)
 include_directories(common/json)
+include_directories(judgeclient)
 
 aux_source_directory(. SRCS)
 aux_source_directory(core SRCS)
 aux_source_directory(core/src SRCS)
 aux_source_directory(wrapper SRCS)
 aux_source_directory(common SRCS)
+aux_source_directory(judgeclient SRCS)
 
 add_executable(${TARGET} ${SRCS})

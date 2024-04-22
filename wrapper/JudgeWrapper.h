@@ -16,7 +16,8 @@ static std::string file = "File IO";
 class JudgeWrapper {
 public:
     static struct result
-    judge(LangConfig *language_config, std::string &src, int submission_id, int test_case_id, const std::string& test_case);
+    judge(LangConfig *language_config, std::string &src, int submission_id, int test_case_id,
+          const std::string &test_case);
 
 private:
     static void writeUtf8ToFile(const std::string &filePath, const std::string &content);
@@ -24,8 +25,4 @@ private:
 
     static std::string compile(CompileConfig *compile_config, std::string &src_path, std::string &output_dir);
     static struct result judge_one(struct config *language_config, int test_case_file_id);
-};
-
-class JudgeClient {
-
 };

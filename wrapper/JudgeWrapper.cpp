@@ -1,7 +1,7 @@
 #include "JudgeWrapper.h"
 #include <fstream>
 #include <iostream>
-
+#include "../common/json/json.h"
 
 /*
  * language_config：配置
