@@ -11,9 +11,9 @@
 
 #define JUDGER_WORKSPACE_BASE "/judger/run"
 #define LOG_BASE "/log/compile.log"
+#define TEST_CASE_DIR "/test_case"
 
 static std::vector<std::string> DefaultEnv{"LANG=en_US.UTF-8", "LANGUAGE=en_US:en", "LC_ALL=en_US.UTF-8"};
-
 
 typedef struct CompileConfig {
     std::string src_name;

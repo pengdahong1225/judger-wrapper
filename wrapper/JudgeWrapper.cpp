@@ -8,7 +8,8 @@
  * src：提交的源代码
  * submission_id：唯一提交id
  */
-struct result JudgeWrapper::judge(LangConfig *language_config, std::string &src, int submission_id) {
+struct result JudgeWrapper::judge(LangConfig *language_config, std::string &src, int submission_id, int test_case_id,
+                                  const std::string& test_case) {
     // init
     auto &compile_config = language_config->compile_config;
     auto &run_config = language_config->run_config;
@@ -25,7 +26,9 @@ struct result JudgeWrapper::judge(LangConfig *language_config, std::string &src,
     }
 
     // compile source code, return exe file path
-    auto exe_path = this->compile(&compile_config, src_path, work_dir);
+    auto exe_path = compile(&compile_config, src_path, work_dir);
+
+    // 解析测试用例json，保存到文件中
 
 }
 
@@ -102,12 +105,6 @@ std::string JudgeWrapper::readFileContent(const std::filesystem::path &filePath)
 
     return content;
 }
-
-
-void JudgeWrapper::run(struct config *language_config, std::string &src) {
-
-}
-
 
 struct result JudgeWrapper::judge_one(struct config *language_config, int test_case_file_id) {
     // 获取测试用例
