@@ -20,6 +20,5 @@ private:
     static void writeUtf8ToFile(const std::string &filePath, const std::string &content);
     static std::string readFileContent(const std::filesystem::path &filePath);
 
-    static std::string compile(CompileConfig *compile_config, std::string &src_path, std::string &output_dir);
-    static struct result judge_one(struct config *language_config, int test_case_file_id);
+    static std::string compile(CompileConfig *compile_config, const std::string &src_path, const std::string &work_dir);
 };

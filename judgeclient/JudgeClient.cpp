@@ -4,14 +4,18 @@
 
 #include <fstream>
 #include <iostream>
+#include <filesystem>
 
 #include "JudgeClient.h"
+#include "../core/src/runner.h"
 
 JudgeClient::JudgeClient(struct RunConfig run_config, int max_cpu_time, int max_real_time, int max_memory,
-                         std::string exe_path, std::string test_case_dir, std::string submission_dir,
+                         std::string exe_path, std::string log_path, std::string test_case_dir,
+                         std::string submission_dir,
                          std::string io_mode) : _run_config(std::move(run_config)), _max_cpu_time(max_cpu_time),
                                                 _max_real_time(max_real_time), _max_memory(max_memory),
                                                 _exe_path(std::move(exe_path)),
+                                                _log_path(std::move(log_path)),
                                                 _test_case_dir(std::move(test_case_dir)),
                                                 _submission_dir(std::move(submission_dir)),
                                                 _io_mode(std::move(io_mode)) {
@@ -21,7 +25,7 @@ JudgeClient::JudgeClient(struct RunConfig run_config, int max_cpu_time, int max_
 
 void JudgeClient::_load_test_case_info() {
     // 打开info文件并读取到_test_case_info中
-    std::ifstream info_file(_test_case_dir + "/info");
+    std::ifstream info_file(_test_case_dir + "/info.json");
     std::stringstream file_contents_stream;
     std::string line;
 
@@ -76,7 +80,44 @@ void JudgeClient::_judge_one(int test_case_file_id) {
     }
 
     // 构建命令
+    std::string cmd = cmd_template::run_cmd_cpp;
+    cmd.replace(cmd.find("{exe_path}"), strlen("{exe_path}"), _exe_path);
 
+    // 执行
+    struct config cfg{
+            // 限制
+            .max_cpu_time = _max_cpu_time,
+            .max_real_time = _max_real_time,
+            .max_memory = _max_memory,
+            .max_stack = 128 * 1024 * 1024,
+            .max_process_number = UNLIMITED,
+            .max_output_size = std::max(1024 * 1024 * 16,
+                                        test_cases[test_case_file_id].get("output_size", 0).asInt() * 2),
+            // 执行参数
+            .exe_path =cmd.data(),
+            .input_path = in_file.data(),
+            .output_path = real_user_output_file.data(),
+            .error_path = real_user_output_file.data(),
+            .args = {nullptr},
+            .env = {nullptr},
+            .log_path = _log_path.data(),
+            .seccomp_rule_name = _run_config.seccomp_rule_name.data(),
+            .uid = 0,
+            .gid = 0
+    };
+    struct result result{};
+
+    ::run(&cfg, &result);
+
+    // if progress exited normally, then we should check output result
+    if (result.result == SUCCESS) {
+        if (!std::filesystem::exists(user_output_file)) {
+            std::cout << "Error: user output file not found" << std::endl;
+        }
+    }
+    else {
+
+    }
 }
 
 void JudgeClient::_compare_output(int test_case_file_id, std::string user_output_file) {

@@ -4,18 +4,14 @@
 info：测试用例描述，json格式
 ```json
 {
-    "test_case_number": 1,
-    "spj": false,
-    "test_cases": {
-        "1": {
-            "stripped_output_md5": "eccbc87e4b5ce2fe28308fd9f2a7baf3",
-            "output_size": 2,
-            "output_md5": "6d7fce9fee471194aa8b5b6e47267f03",
-            "input_name": "1.in",
-            "input_size": 4,
-            "output_name": "1.out"
-        }
+  "test_case_number": 1,
+  "spj": false,
+  "test_cases": {
+    "1": {
+      "input_name": "1.in",
+      "output_name": "1.out"
     }
+  }
 }
 ```
 
@@ -28,3 +24,31 @@ x.out：输出文件
 ```
 3
 ```
+
+## command template
+cpp：<br>
+`/usr/bin/g++ -DONLINE_JUDGE -O2 -w -fmax-errors=3 -std=c++11 {src_path} -lm -o {exe_path}`<br>
+`{exe_path}`<br>
+
+## 容器目录
+**根目录**
+
+container_workspace = /app
+
+judger_dir = /app/judger
+
+work_dir = /app/judger/{submission_id}
+
+**编译**
+
+源代码 = /judger/{submission_id}/{src_name}
+
+编译输出 = /app/judger/{submission_id}/compiler.out
+
+可执行文件 = /app/judger/{submission_id}/{exe_name}
+
+日志 = /app/judger/{submission_id}/compiler.log
+
+**运行**
+
+测试用例 = /app/judger/{submission_id}/test_case

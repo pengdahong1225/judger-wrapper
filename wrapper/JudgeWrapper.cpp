@@ -8,13 +8,13 @@
  * submission_id：唯一提交id
  */
 struct result JudgeWrapper::judge(LangConfig *language_config, std::string &src, int submission_id, int test_case_id,
-                                  const std::string& test_case) {
+                                  const std::string &test_case) {
     // init
     auto &compile_config = language_config->compile_config;
     auto &run_config = language_config->run_config;
-    std::string work_dir = JUDGER_WORKSPACE_BASE + std::to_string(submission_id);
+    std::string work_dir = judger_dir + std::to_string(submission_id);
 
-    // 源代码文件路径：/judger/run/submission_id/src_name
+    // 源代码文件路径：/judger/submission_id/src_name
     std::string src_path = work_dir + "/" + compile_config.src_name;
     // write source code into file
     try {
@@ -41,9 +41,11 @@ void JudgeWrapper::writeUtf8ToFile(const std::string &filePath, const std::strin
     file.close();
 }
 
-std::string JudgeWrapper::compile(CompileConfig *compile_config, std::string &src_path, std::string &output_dir) {
-    std::string exe_path = output_dir + "/" + compile_config->exe_name;
-    std::string compiler_out = output_dir + "/" + "compiler.out";
+std::string
+JudgeWrapper::compile(CompileConfig *compile_config, const std::string &src_path, const std::string &work_dir) {
+    std::string exe_path = work_dir + "/" + compile_config->exe_name;
+    std::string compiler_out = work_dir + "/" + "compiler.out";
+    std::string log_path = work_dir + "/" + "compile.log";
     // 编译
     struct config cfg{
             // 限制
@@ -55,10 +57,10 @@ std::string JudgeWrapper::compile(CompileConfig *compile_config, std::string &sr
             .max_process_number = UNLIMITED,
             // 执行参数
             .exe_path = exe_path.data(),
-            .input_path = src_path.data(),
+            .input_path = const_cast<char *>(src_path.data()),
             .output_path = compiler_out.data(),
             .error_path = compiler_out.data(),
-            .log_path = LOG_BASE,
+            .log_path = log_path.data(),
             .seccomp_rule_name = nullptr,
             .args = nullptr,
             .env = nullptr,
@@ -104,16 +106,3 @@ std::string JudgeWrapper::readFileContent(const std::filesystem::path &filePath)
 
     return content;
 }
-
-struct result JudgeWrapper::judge_one(struct config *language_config, int test_case_file_id) {
-    // 获取测试用例
-
-
-    // 编译运行
-    struct result *result = (struct result *) malloc(sizeof(struct result));
-    ::run(language_config, result);
-    // 返回结果(copy)
-    return *result;
-}
-
-

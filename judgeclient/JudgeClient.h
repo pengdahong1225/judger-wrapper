@@ -16,15 +16,17 @@
 class JudgeClient {
 public:
     explicit JudgeClient(struct RunConfig run_config, int max_cpu_time, int max_real_time, int max_memory,
-                         std::string exe_path, std::string test_case_dir, std::string submission_dir,
+                         std::string exe_path, std::string log_path, std::string test_case_dir,
+                         std::string submission_dir,
                          std::string io_mode);
+    void run();
 
 private:
     void _load_test_case_info();
     void _get_test_case_file_info(int test_case_file_id);
-    void run();
     void _judge_one(int test_case_file_id);
     void _compare_output(int test_case_file_id, std::string user_output_file);
+
 private:
     struct RunConfig _run_config;
     int _max_cpu_time;
@@ -32,6 +34,7 @@ private:
     int _max_memory;
     std::string _exe_path;
     std::string _test_case_dir;
+    std::string _log_path;
     std::string _submission_dir;
     std::string _io_mode;
 
@@ -39,5 +42,9 @@ private:
     bool _is_test_case_info_loaded = false;
 };
 
+namespace cmd_template {
+    static std::string compile_cmd_cpp = "/usr/bin/g++ -DONLINE_JUDGE -O2 -w -fmax-errors=3 -std=c++11 {src_path} -lm -o {exe_path}";
+    static std::string run_cmd_cpp = "{exe_path}";
+}
 
 #endif //CORE_WRAPPER_JUDGECLIENT_H
