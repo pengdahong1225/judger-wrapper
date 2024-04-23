@@ -113,17 +113,62 @@ void JudgeClient::_judge_one(int test_case_file_id) {
     if (result.result == SUCCESS) {
         if (!std::filesystem::exists(user_output_file)) {
             std::cout << "Error: user output file not found" << std::endl;
+            return;
         }
-    }
-    else {
-
+        if (_compare_output(test_case_file_id, user_output_file)) {
+            std::cout << "output failed" << std::endl;
+            return;
+        }
     }
 }
 
-void JudgeClient::_compare_output(int test_case_file_id, std::string user_output_file) {
+bool JudgeClient::_compare_output(int test_case_file_id, const std::string &user_output_file) {
+    // 读取用户执行输出文件
+    std::string user_content;
+    try {
+        user_content = readFileContent(user_output_file);
+        std::cout << "user_output_file user_content: " << user_content << '\n';
+    } catch (const std::exception &e) {
+        std::cerr << "Error: " << e.what() << '\n';
+        return false;
+    }
+    if (!user_content.empty()) {
+        std::cout << "user_output_file empty: " << '\n';
+        return false;
+    }
 
+    // 读取测试用例的输出文件
+    std::string case_out_content;
+    auto &test_cases = _test_case_info["test_cases"];
+    std::string case_out_file = _test_case_dir + "/" + test_cases[test_case_file_id].get("output_name", "").asString();
+    try {
+        case_out_content = readFileContent(case_out_file);
+        std::cout << "case_out_file case_out_content: " << case_out_content << '\n';
+    } catch (const std::exception &e) {
+        std::cerr << "Error: " << e.what() << '\n';
+        return false;
+    }
+    if (!case_out_content.empty()) {
+        std::cout << "case_out_file empty: " << '\n';
+        return false;
+    }
+
+    // 比较
+    return user_content == case_out_content;
 }
 
 void JudgeClient::_get_test_case_file_info(int test_case_file_id) {
 
+}
+
+std::string JudgeClient::readFileContent(const std::filesystem::path &filePath) {
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        throw std::runtime_error("Failed to open file: " + filePath.string());
+    }
+
+    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    file.close();
+
+    return content;
 }

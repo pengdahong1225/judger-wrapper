@@ -52,3 +52,5 @@ work_dir = /app/judger/{submission_id}
 **运行**
 
 测试用例 = /app/judger/{submission_id}/test_case
+
+运行输出 = /app/judger/{submission_id}/{test_case_file_id}.out
