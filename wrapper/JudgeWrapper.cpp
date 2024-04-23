@@ -1,33 +1,51 @@
 #include "JudgeWrapper.h"
 #include <fstream>
 #include <iostream>
+#include "../common/json/json.h"
 
 /*
  * language_config：配置
  * src：提交的源代码
  * submission_id：唯一提交id
+ * test_case_json：测试用例，需要解析
  */
-struct result JudgeWrapper::judge(LangConfig *language_config, std::string &src, int submission_id, int test_case_id,
-                                  const std::string &test_case) {
+JudgeResult JudgeWrapper::judge(LangConfig *language_config, std::string &src, int submission_id,
+                                const std::string &test_case_json) {
+    JudgeResult ret{};
+
     // init
     auto &compile_config = language_config->compile_config;
     auto &run_config = language_config->run_config;
     std::string work_dir = judger_dir + std::to_string(submission_id);
 
-    // 源代码文件路径：/judger/submission_id/src_name
+    // TODO write source code into file
+    // 源代码文件路径：/app/judger/{submission_id}/{src_name}
     std::string src_path = work_dir + "/" + compile_config.src_name;
-    // write source code into file
     try {
         writeUtf8ToFile(src_path, src);
-        std::cout << "Text successfully written to file.\n";
     } catch (const std::exception &e) {
-        std::cerr << "Error: " << e.what() << '\n';
+        sprintf(ret.error_message.data(), "Failed to write source code into file[%s],err=%s", src_path.c_str(),
+                e.what());
+        return ret;
     }
 
-    // compile source code, return exe file path
-    auto exe_path = compile(&compile_config, src_path, work_dir);
+    // TODO compile source code, return exe file path
+    std::string exe_path;
+    try {
+        exe_path = compile(&compile_config, src_path, work_dir);
+    } catch (const std::exception &e) {
+        sprintf(ret.error_message.data(), "Failed to compile source code,err=%s", e.what());
+        return ret;
+    }
 
-    // 解析测试用例json，保存到文件中
+    // TODO 解析测试用例json，保存到文件中
+    try {
+        initTestCaseEnv(work_dir, test_case_json);
+    } catch (const std::exception &e) {
+        sprintf(ret.error_message.data(), "Failed to parse test case json,err=%s", e.what());
+        return ret;
+    }
+    // TODO 循环运行测试用例
 
 }
 
@@ -69,6 +87,17 @@ JudgeWrapper::compile(CompileConfig *compile_config, const std::string &src_path
     };
     struct result result{};
     ::run(&cfg, &result);
+    if (result.result != SUCCESS) {
+        std::filesystem::remove(compiler_out);
+        std::string msg;
+        // todo 将result对象序列化为json
+
+        throw std::runtime_error(sprintf("Compile failed: %s", result.error));
+        std::cout << "Compile failed: " << result.error << '\n';
+        std::filesystem::remove(compiler_out);
+        return "";
+    }
+
     if (result.result == SUCCESS) {
         if (std::filesystem::exists(compiler_out)) {
             std::string content;
@@ -105,4 +134,21 @@ std::string JudgeWrapper::readFileContent(const std::filesystem::path &filePath)
     file.close();
 
     return content;
+}
+
+/*
+ * 初始化测试用例环境
+ * 1.创建test_case目录
+ * 2.解析test_case_json
+ * 3.创建文件
+ */
+void JudgeWrapper::initTestCaseEnv(const std::string &work_dir, const std::string &test_case_json) {
+    // work_dir = /app/judger/{submission_id}
+    // 创建test_case目录
+    if (std::filesystem::create_directory(work_dir + "/test_case")) {
+        throw std::runtime_error("Failed to create test_case directory: " + work_dir + "/test_case");
+    }
+
+    // 解析json
+
 }

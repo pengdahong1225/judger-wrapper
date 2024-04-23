@@ -32,4 +32,15 @@ typedef struct LangConfig {
     RunConfig run_config;
 } LangConfig;
 
+typedef struct JudgeResult {
+    int code;
+    int cpu_time;
+    int real_time;
+    long memory;
+    int signal;
+    int exit_code;
+    int error;
+    std::string error_message;
+} JudgeResult;
+
 #endif //CORE_WRAPPER_DEFINE_H

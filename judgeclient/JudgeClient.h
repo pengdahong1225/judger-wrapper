@@ -9,6 +9,11 @@
 #include "../common/define.h"
 #include "../common/json/json.h"
 
+namespace cmd_template {
+    static std::string compile_cmd_cpp = "/usr/bin/g++ -DONLINE_JUDGE -O2 -w -fmax-errors=3 -std=c++11 {src_path} -lm -o {exe_path}";
+    static std::string run_cmd_cpp = "{exe_path}";
+}
+
 /*
  * core调用实例
  * 初始化之后先读取测试用例
@@ -32,21 +37,15 @@ public:
                          std::string exe_path, std::string log_path, std::string test_case_dir,
                          std::string submission_dir,
                          std::string io_mode);
-    void run();
 
 private:
     void _load_test_case_info();
-    void _get_test_case_file_info(int test_case_file_id);
-    void _judge_one(int test_case_file_id);
+    JudgeResult _judge_one(int test_case_file_id);
     bool _compare_output(int test_case_file_id, const std::string& user_output_file);
 
 private:
     static std::string readFileContent(const std::filesystem::path &filePath);
 };
 
-namespace cmd_template {
-    static std::string compile_cmd_cpp = "/usr/bin/g++ -DONLINE_JUDGE -O2 -w -fmax-errors=3 -std=c++11 {src_path} -lm -o {exe_path}";
-    static std::string run_cmd_cpp = "{exe_path}";
-}
 
 #endif //CORE_WRAPPER_JUDGECLIENT_H

@@ -53,15 +53,13 @@ void JudgeClient::_load_test_case_info() {
     _is_test_case_info_loaded = true;
 }
 
-void JudgeClient::run() {
-
-}
-
 // 运行一个测试用例
-void JudgeClient::_judge_one(int test_case_file_id) {
+JudgeResult JudgeClient::_judge_one(int test_case_file_id) {
+    JudgeResult ret{};
+
     if (!_is_test_case_info_loaded) {
-        std::cout << "Error: Test case info not loaded" << std::endl;
-        return;
+        ret.error_message = "Error: Test case info not loaded";
+        return ret;
     }
 
     // 读取id对应的case
@@ -75,8 +73,8 @@ void JudgeClient::_judge_one(int test_case_file_id) {
         real_user_output_file = user_output_file = _submission_dir + "/" + std::to_string(test_case_file_id) + ".out";
     }
     else {
-        std::cout << "Error: _io_mode" << std::endl;
-        return;
+        ret.error_message = "Error: _io_mode";
+        return ret;
     }
 
     // 构建命令
@@ -106,19 +104,31 @@ void JudgeClient::_judge_one(int test_case_file_id) {
             .gid = 0
     };
     struct result result{};
-
     ::run(&cfg, &result);
 
     // if progress exited normally, then we should check output result
-    if (result.result == SUCCESS) {
+    ret.code = result.result;
+    ret.cpu_time = result.cpu_time;
+    ret.real_time = result.real_time;
+    ret.memory = result.memory;
+    ret.signal = result.signal;
+    ret.exit_code = result.exit_code;
+    ret.error = result.error;
+    if (result.result != SUCCESS) {
+        ret.error_message = "Error: progress exited normally";
+        return ret;
+    }
+    else {
         if (!std::filesystem::exists(user_output_file)) {
-            std::cout << "Error: user output file not found" << std::endl;
-            return;
+            ret.error_message = "Error: user output file not found";
+            return ret;
         }
         if (_compare_output(test_case_file_id, user_output_file)) {
-            std::cout << "output failed" << std::endl;
-            return;
+            ret.error_message = "Error: output failed";
+            return ret;
         }
+        ret.error_message = "Success";
+        return ret;
     }
 }
 
@@ -155,10 +165,6 @@ bool JudgeClient::_compare_output(int test_case_file_id, const std::string &user
 
     // 比较
     return user_content == case_out_content;
-}
-
-void JudgeClient::_get_test_case_file_info(int test_case_file_id) {
-
 }
 
 std::string JudgeClient::readFileContent(const std::filesystem::path &filePath) {

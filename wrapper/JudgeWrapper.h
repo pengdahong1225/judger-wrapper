@@ -12,13 +12,11 @@
  */
 class JudgeWrapper {
 public:
-    static struct result
-    judge(LangConfig *language_config, std::string &src, int submission_id, int test_case_id,
-          const std::string &test_case);
+    static JudgeResult judge(LangConfig *language_config, std::string &src, int submission_id, const std::string& test_case_json);
 
 private:
     static void writeUtf8ToFile(const std::string &filePath, const std::string &content);
     static std::string readFileContent(const std::filesystem::path &filePath);
-
     static std::string compile(CompileConfig *compile_config, const std::string &src_path, const std::string &work_dir);
+    static void initTestCaseEnv(const std::string& work_dir, const std::string& test_case_json);
 };
