@@ -6,7 +6,8 @@
 #define CORE_WRAPPER_JUDGECLIENT_H
 
 #include <string>
-#include "define.h"
+#include "../common/define.h"
+#include "../common/json/json.h"
 
 /*
  * core调用实例
@@ -20,6 +21,7 @@ public:
 
 private:
     void _load_test_case_info();
+    void _get_test_case_file_info(int test_case_file_id);
     void run();
     void _judge_one(int test_case_file_id);
     void _compare_output(int test_case_file_id, std::string user_output_file);
@@ -33,7 +35,8 @@ private:
     std::string _submission_dir;
     std::string _io_mode;
 
-    std::string _test_case_info; // 从文件加载的测试用例信息
+    Json::Value _test_case_info; // 从info文件加载的测试用例信息
+    bool _is_test_case_info_loaded = false;
 };
 
 

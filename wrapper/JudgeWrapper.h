@@ -5,10 +5,7 @@
 #include <filesystem>
 
 #include "../core/src/runner.h"
-#include "define.h"
-
-static std::string standard = "Standard IO";
-static std::string file = "File IO";
+#include "../common/define.h"
 
 /*
  * 作为judger-core的外部调用接口类
