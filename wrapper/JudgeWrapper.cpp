@@ -30,37 +30,35 @@ JudgeResult JudgeWrapper::judge(LangConfig *language_config, std::string &src, i
     }
 
     // TODO compile source code, return exe file path
-    std::string exe_path;
-    try {
-        exe_path = compile(&compile_config, src_path, work_dir);
-    } catch (const std::exception &e) {
-        sprintf(ret.error_message.data(), "Failed to compile source code,err=%s", e.what());
-        return ret;
-    }
+    CompileResult compile_result = compile(&compile_config, src_path, work_dir);
 
-    // TODO 解析测试用例json，保存到文件中
+    // TODO 初始化测试环境
     try {
         initTestCaseEnv(work_dir, test_case_json);
     } catch (const std::exception &e) {
         sprintf(ret.error_message.data(), "Failed to parse test case json,err=%s", e.what());
         return ret;
     }
-    // TODO 循环运行测试用例
 
+    // TODO 循环运行测试用例
+    
 }
 
 void JudgeWrapper::writeUtf8ToFile(const std::string &filePath, const std::string &content) {
-    std::ofstream file(filePath, std::ios_base::in);
+    std::ofstream file(filePath, std::ios_base::out | std::ios_base::trunc);
     if (!file.is_open()) {
         throw std::runtime_error("Failed to open file: " + filePath);
     }
 
     file << content;
+    file.flush();
     file.close();
 }
 
-std::string
+CompileResult
 JudgeWrapper::compile(CompileConfig *compile_config, const std::string &src_path, const std::string &work_dir) {
+    CompileResult ret{};
+
     std::string exe_path = work_dir + "/" + compile_config->exe_name;
     std::string compiler_out = work_dir + "/" + "compiler.out";
     std::string log_path = work_dir + "/" + "compile.log";
@@ -87,40 +85,34 @@ JudgeWrapper::compile(CompileConfig *compile_config, const std::string &src_path
     };
     struct result result{};
     ::run(&cfg, &result);
+    ret.code = result.result;
+    ret.cpu_time = result.cpu_time;
+    ret.real_time = result.real_time;
+    ret.memory = result.memory;
+    ret.signal = result.signal;
+    ret.exit_code = result.exit_code;
+    ret.error = result.error;
+
     if (result.result != SUCCESS) {
-        std::filesystem::remove(compiler_out);
-        std::string msg;
-        // todo 将result对象序列化为json
-
-        throw std::runtime_error(sprintf("Compile failed: %s", result.error));
-        std::cout << "Compile failed: " << result.error << '\n';
-        std::filesystem::remove(compiler_out);
-        return "";
-    }
-
-    if (result.result == SUCCESS) {
-        if (std::filesystem::exists(compiler_out)) {
-            std::string content;
-            try {
-                content = readFileContent(compiler_out);
-                std::cout << "compiler_out content: " << content << '\n';
-            } catch (const std::exception &e) {
-                std::cerr << "Error: " << e.what() << '\n';
-                return "";
-            }
-
-            if (!content.empty()) {
-                std::cout << "compiler_out content: " << content << '\n';
-                return "";
-            }
-        }
-        std::filesystem::remove(compiler_out);
-        return exe_path;
+        ret.msg = "Compile failed";
+        return ret;
     }
     else {
-        std::cout << "Compile failed: " << result.error << '\n';
-        std::filesystem::remove(compiler_out);
-        return "";
+        if (!std::filesystem::exists(compiler_out)) {
+            sprintf(ret.msg.data(), "Failed to read compiler_out file,err = %s",
+                    "compiler_out file not exists");
+            return ret;
+        }
+        std::string content;
+        try {
+            content = readFileContent(compiler_out);
+        } catch (const std::exception &e) {
+            sprintf(ret.msg.data(), "Failed to read compiler_out file,err = %s", e.what());
+            return ret;
+        }
+        ret.msg = content;
+        ret.exe_path = exe_path;
+        return ret;
     }
 }
 
@@ -149,6 +141,53 @@ void JudgeWrapper::initTestCaseEnv(const std::string &work_dir, const std::strin
         throw std::runtime_error("Failed to create test_case directory: " + work_dir + "/test_case");
     }
 
-    // 解析json
+    // 解析test_case_json
+    Json::Value root; // 顶层
+    Json::Reader reader;
+    if (!reader.parse(test_case_json, root) || root.empty()) {
+        throw std::runtime_error("Failed to parse test_case_json: " + test_case_json);
+    }
 
+    // info
+    std::string info_path = work_dir + "/test_case/info.json";
+    try {
+        writeUtf8ToFile(info_path, root.get("info", "").asString());
+    } catch (const std::exception &e) {
+        throw e; // 抛到上层
+    }
+
+    // input
+    if (!root.isMember("input")) {
+        throw std::runtime_error("Failed to parse test_case_json: " + test_case_json);
+    }
+    if (!root["input"].isArray()) {
+        throw std::runtime_error("Failed to parse test_case_json: " + test_case_json);
+    }
+    Json::Value input_array = root["input"];
+    for (const auto &item: input_array) {
+        std::string input_path = work_dir + "/test_case/" + item.get("name", "").asString();
+        std::string content = item.get("content", "").asString();
+        try {
+            writeUtf8ToFile(input_path, content);
+        } catch (const std::exception &e) {
+            throw e; // 抛到上层
+        }
+    }
+    // output
+    if (!root.isMember("output")) {
+        throw std::runtime_error("Failed to parse test_case_json: " + test_case_json);
+    }
+    if (!root["output"].isArray()) {
+        throw std::runtime_error("Failed to parse test_case_json: " + test_case_json);
+    }
+    Json::Value output_array = root["output"];
+    for (const auto &item: output_array) {
+        std::string input_path = work_dir + "/test_case/" + item.get("name", "").asString();
+        std::string content = item.get("content", "").asString();
+        try {
+            writeUtf8ToFile(input_path, content);
+        } catch (const std::exception &e) {
+            throw e; // 抛到上层
+        }
+    }
 }

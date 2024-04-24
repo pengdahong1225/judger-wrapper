@@ -17,6 +17,6 @@ public:
 private:
     static void writeUtf8ToFile(const std::string &filePath, const std::string &content);
     static std::string readFileContent(const std::filesystem::path &filePath);
-    static std::string compile(CompileConfig *compile_config, const std::string &src_path, const std::string &work_dir);
+    static CompileResult compile(CompileConfig *compile_config, const std::string &src_path, const std::string &work_dir);
     static void initTestCaseEnv(const std::string& work_dir, const std::string& test_case_json);
 };

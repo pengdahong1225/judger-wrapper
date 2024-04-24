@@ -1,7 +1,36 @@
 # judger-JudgeWrapper
 
-## test_case文件
-info：测试用例描述，json格式
+## test文件说明
+> 通过test_case.json生成test_case目录和文件
+
+test_case.json:
+```json
+{
+  "info": {
+    "test_case_number": 1,
+    "spj": false,
+    "test_cases": {
+      "1": {
+        "input_name": "1.in",
+        "output_name": "1.out"
+      }
+    }
+  },
+  "input": [
+    {
+      "name": "1.in",
+      "content": "1 2"
+    }
+  ],
+  "output": [
+    {
+      "name": "1.out",
+      "content": "3"
+    }
+  ]
+}
+```
+info.json:
 ```json
 {
   "test_case_number": 1,

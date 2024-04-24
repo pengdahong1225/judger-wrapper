@@ -43,4 +43,16 @@ typedef struct JudgeResult {
     std::string error_message;
 } JudgeResult;
 
+typedef struct CompileResult {
+    int code;
+    int cpu_time;
+    int real_time;
+    long memory;
+    int signal;
+    int exit_code;
+    int error;
+    std::string msg;
+    std::string exe_path;
+} CompileResult;
+
 #endif //CORE_WRAPPER_DEFINE_H
