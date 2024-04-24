@@ -53,7 +53,7 @@ JudgeResultList JudgeWrapper::judge(LangConfig *language_config, std::string &sr
     // TODO run
     auto judger_client = new JudgeClient(run_config, compile_result.exe_path, log_path, test_case_dir, work_dir);
     judger_client->run(resultList);
-
+    delete judger_client;
     return resultList;
 }
 

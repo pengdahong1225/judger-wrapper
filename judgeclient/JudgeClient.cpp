@@ -22,9 +22,13 @@ JudgeClient::JudgeClient(struct RunConfig run_config, std::string exe_path, std:
     _load_test_case_info();
 }
 
-void JudgeClient::run(JudgeResultList &result) {
+void JudgeClient::run(JudgeResultList &resultList) {
     // 循环运行测试用例
-
+    auto &test_cases_arr = _test_case_info["test_cases"];
+    for (int i = 0; i < test_cases_arr.size(); i++) {
+        auto result = _judge_one(i + 1);
+        resultList.emplace_back(result);
+    }
 }
 
 void JudgeClient::_load_test_case_info() {
@@ -127,8 +131,10 @@ JudgeResult JudgeClient::_judge_one(int test_case_file_id) {
             ret.content = "Error: user output file not found";
             return ret;
         }
-        if (_compare_output(test_case_file_id, user_output_file)) {
-            ret.content = "Error: output failed";
+        try {
+            _compare_output(test_case_file_id, user_output_file);
+        } catch (const std::exception &e) {
+            sprintf(ret.content.data(), "output failed Error: %s", e.what());
             return ret;
         }
         ret.content = "Success";
@@ -136,19 +142,13 @@ JudgeResult JudgeClient::_judge_one(int test_case_file_id) {
     }
 }
 
-bool JudgeClient::_compare_output(int test_case_file_id, const std::string &user_output_file) {
+void JudgeClient::_compare_output(int test_case_file_id, const std::string &user_output_file) {
     // 读取用户执行输出文件
     std::string user_content;
     try {
         user_content = readFileContent(user_output_file);
-        std::cout << "user_output_file user_content: " << user_content << '\n';
     } catch (const std::exception &e) {
-        std::cerr << "Error: " << e.what() << '\n';
-        return false;
-    }
-    if (!user_content.empty()) {
-        std::cout << "user_output_file empty: " << '\n';
-        return false;
+        throw e; // 抛到上层
     }
 
     // 读取测试用例的输出文件
@@ -157,18 +157,20 @@ bool JudgeClient::_compare_output(int test_case_file_id, const std::string &user
     std::string case_out_file = _test_case_dir + "/" + test_cases[test_case_file_id].get("output_name", "").asString();
     try {
         case_out_content = readFileContent(case_out_file);
-        std::cout << "case_out_file case_out_content: " << case_out_content << '\n';
     } catch (const std::exception &e) {
-        std::cerr << "Error: " << e.what() << '\n';
-        return false;
-    }
-    if (!case_out_content.empty()) {
-        std::cout << "case_out_file empty: " << '\n';
-        return false;
+        throw e; // 抛到上层
     }
 
     // 比较
-    return user_content == case_out_content;
+    if (user_content.empty()) {
+        throw std::runtime_error("Error: user output file is empty");
+    }
+    if (case_out_content.empty()) {
+        throw std::runtime_error("Error: case output file is empty");
+    }
+    if (user_content != case_out_content) {
+        throw std::runtime_error("Error: user output file is not equal to case output file");
+    }
 }
 
 std::string JudgeClient::readFileContent(const std::filesystem::path &filePath) {
