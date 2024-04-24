@@ -75,6 +75,12 @@ JudgeWrapper::compile(CompileConfig *compile_config, const std::string &src_path
     std::string exe_path = work_dir + "/" + compile_config->exe_name;
     std::string compiler_out = work_dir + "/" + "compiler.out";
     std::string log_path = work_dir + "/" + "compile.log";
+
+    // 构造编译命令
+    // /usr/bin/g++ -O2 -w -fmax-errors=3 -std=c++11 {src_path} -lm -o {exe_path}
+    std::string cmd =
+            compile_config->compiler_exe + " " + compile_config->compile_args + " " + src_path + " -lm -o " + exe_path;
+
     // 编译
     struct config cfg{
             // 限制
@@ -82,17 +88,17 @@ JudgeWrapper::compile(CompileConfig *compile_config, const std::string &src_path
             .max_real_time = compile_config->max_real_time,
             .max_memory = compile_config->max_memory,
             .max_stack = 128 * 1024 * 1024,
-            .max_output_size = 20 * 1024 * 1024,
             .max_process_number = UNLIMITED,
+            .max_output_size = 20 * 1024 * 1024,
             // 执行参数
-            .exe_path = exe_path.data(),
+            .exe_path = compile_config->compiler_exe.data(), // 编译器
             .input_path = const_cast<char *>(src_path.data()),
             .output_path = compiler_out.data(),
             .error_path = compiler_out.data(),
+            .args = {compile_config->compile_args.data()}, // 编译参数
+            .env = {nullptr},
             .log_path = log_path.data(),
             .seccomp_rule_name = nullptr,
-            .args = nullptr,
-            .env = nullptr,
             .uid = 0,
             .gid = 0
     };

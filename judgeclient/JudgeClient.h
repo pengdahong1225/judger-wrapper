@@ -9,10 +9,6 @@
 #include "../common/define.h"
 #include "../common/json/json.h"
 
-namespace cmd_template {
-    static std::string compile_cmd_cpp = "/usr/bin/g++ -DONLINE_JUDGE -O2 -w -fmax-errors=3 -std=c++11 {src_path} -lm -o {exe_path}";
-    static std::string run_cmd_cpp = "{exe_path}";
-}
 
 /*
  * core调用实例，可用对象池优化，避免频繁创建销毁

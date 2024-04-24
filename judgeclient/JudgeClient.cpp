@@ -86,8 +86,7 @@ JudgeResult JudgeClient::_judge_one(int test_case_file_id) {
     }
 
     // 构建命令
-    std::string cmd = cmd_template::run_cmd_cpp;
-    cmd.replace(cmd.find("{exe_path}"), strlen("{exe_path}"), _exe_path);
+    std::string cmd = _exe_path;
 
     // 执行
     struct config cfg{

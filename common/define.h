@@ -19,6 +19,8 @@ typedef struct CompileConfig {
     int max_cpu_time;
     int max_real_time;
     int max_memory;
+    std::string compiler_exe;
+    std::string compile_args;
 } CompileConfig;
 
 typedef struct RunConfig {
