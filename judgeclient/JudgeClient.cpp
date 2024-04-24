@@ -9,18 +9,22 @@
 #include "JudgeClient.h"
 #include "../core/src/runner.h"
 
-JudgeClient::JudgeClient(struct RunConfig run_config, int max_cpu_time, int max_real_time, int max_memory,
-                         std::string exe_path, std::string log_path, std::string test_case_dir,
-                         std::string submission_dir,
-                         std::string io_mode) : _run_config(std::move(run_config)), _max_cpu_time(max_cpu_time),
-                                                _max_real_time(max_real_time), _max_memory(max_memory),
+JudgeClient::JudgeClient(struct RunConfig run_config, std::string exe_path, std::string log_path,
+                         std::string test_case_dir,
+                         std::string work_dir,
+                         std::string io_mode) : _run_config(std::move(run_config)),
                                                 _exe_path(std::move(exe_path)),
                                                 _log_path(std::move(log_path)),
                                                 _test_case_dir(std::move(test_case_dir)),
-                                                _submission_dir(std::move(submission_dir)),
+                                                _work_dir(std::move(work_dir)),
                                                 _io_mode(std::move(io_mode)) {
     // 加载测试用例info
     _load_test_case_info();
+}
+
+void JudgeClient::run(JudgeResultList &result) {
+    // 循环运行测试用例
+
 }
 
 void JudgeClient::_load_test_case_info() {
@@ -58,7 +62,7 @@ JudgeResult JudgeClient::_judge_one(int test_case_file_id) {
     JudgeResult ret{};
 
     if (!_is_test_case_info_loaded) {
-        ret.error_message = "Error: Test case info not loaded";
+        ret.content = "Error: Test case info not loaded";
         return ret;
     }
 
@@ -69,11 +73,11 @@ JudgeResult JudgeClient::_judge_one(int test_case_file_id) {
     // 创建运行需要的文件
     std::string real_user_output_file;
     std::string user_output_file;
-    if (_io_mode == standard) {
-        real_user_output_file = user_output_file = _submission_dir + "/" + std::to_string(test_case_file_id) + ".out";
+    if (_io_mode == standardIO) {
+        real_user_output_file = user_output_file = _work_dir + "/" + std::to_string(test_case_file_id) + ".out";
     }
     else {
-        ret.error_message = "Error: _io_mode";
+        ret.content = "Error: _io_mode";
         return ret;
     }
 
@@ -84,9 +88,9 @@ JudgeResult JudgeClient::_judge_one(int test_case_file_id) {
     // 执行
     struct config cfg{
             // 限制
-            .max_cpu_time = _max_cpu_time,
-            .max_real_time = _max_real_time,
-            .max_memory = _max_memory,
+            .max_cpu_time = _run_config.max_cpu_time,
+            .max_real_time = _run_config.max_real_time,
+            .max_memory = _run_config.max_memory,
             .max_stack = 128 * 1024 * 1024,
             .max_process_number = UNLIMITED,
             .max_output_size = std::max(1024 * 1024 * 16,
@@ -115,19 +119,19 @@ JudgeResult JudgeClient::_judge_one(int test_case_file_id) {
     ret.exit_code = result.exit_code;
     ret.error = result.error;
     if (result.result != SUCCESS) {
-        ret.error_message = "Error: progress exited normally";
+        ret.content = "Error: progress exited normally";
         return ret;
     }
     else {
         if (!std::filesystem::exists(user_output_file)) {
-            ret.error_message = "Error: user output file not found";
+            ret.content = "Error: user output file not found";
             return ret;
         }
         if (_compare_output(test_case_file_id, user_output_file)) {
-            ret.error_message = "Error: output failed";
+            ret.content = "Error: output failed";
             return ret;
         }
-        ret.error_message = "Success";
+        ret.content = "Success";
         return ret;
     }
 }

@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include "../common/json/json.h"
+#include "../judgeclient/JudgeClient.h"
 
 /*
  * language_config：配置
@@ -9,39 +10,51 @@
  * submission_id：唯一提交id
  * test_case_json：测试用例，需要解析
  */
-JudgeResult JudgeWrapper::judge(LangConfig *language_config, std::string &src, int submission_id,
-                                const std::string &test_case_json) {
-    JudgeResult ret{};
-
-    // init
+JudgeResultList JudgeWrapper::judge(LangConfig *language_config, std::string &src, int submission_id,
+                                    const std::string &test_case_json) {
+    JudgeResultList resultList;
     auto &compile_config = language_config->compile_config;
     auto &run_config = language_config->run_config;
     std::string work_dir = judger_dir + std::to_string(submission_id);
+    std::string log_path = work_dir + "/" + "run.log";
+    std::string test_case_dir = work_dir + "/" + "test_case";
 
     // TODO write source code into file
     // 源代码文件路径：/app/judger/{submission_id}/{src_name}
     std::string src_path = work_dir + "/" + compile_config.src_name;
+    JudgeResult init_result{};
     try {
         writeUtf8ToFile(src_path, src);
     } catch (const std::exception &e) {
-        sprintf(ret.error_message.data(), "Failed to write source code into file[%s],err=%s", src_path.c_str(),
+        sprintf(init_result.content.data(), "Failed to write source code into file[%s],err=%s",
+                src_path.c_str(),
                 e.what());
-        return ret;
+        resultList.emplace_back(init_result);
+        return resultList;
     }
 
     // TODO compile source code, return exe file path
-    CompileResult compile_result = compile(&compile_config, src_path, work_dir);
+    JudgeResult compile_result = compile(&compile_config, src_path, work_dir);
+    if (compile_result.code != SUCCESS || compile_result.exe_path.empty()) {
+        resultList.emplace_back(compile_result);
+        return resultList;
+    }
 
     // TODO 初始化测试环境
+    JudgeResult parse_result{};
     try {
         initTestCaseEnv(work_dir, test_case_json);
     } catch (const std::exception &e) {
-        sprintf(ret.error_message.data(), "Failed to parse test case json,err=%s", e.what());
-        return ret;
+        sprintf(parse_result.content.data(), "Failed to parse test case json,err=%s", e.what());
+        resultList.emplace_back(parse_result);
+        return resultList;
     }
 
-    // TODO 循环运行测试用例
-    
+    // TODO run
+    auto judger_client = new JudgeClient(run_config, compile_result.exe_path, log_path, test_case_dir, work_dir);
+    judger_client->run(resultList);
+
+    return resultList;
 }
 
 void JudgeWrapper::writeUtf8ToFile(const std::string &filePath, const std::string &content) {
@@ -55,9 +68,9 @@ void JudgeWrapper::writeUtf8ToFile(const std::string &filePath, const std::strin
     file.close();
 }
 
-CompileResult
+JudgeResult
 JudgeWrapper::compile(CompileConfig *compile_config, const std::string &src_path, const std::string &work_dir) {
-    CompileResult ret{};
+    JudgeResult ret{};
 
     std::string exe_path = work_dir + "/" + compile_config->exe_name;
     std::string compiler_out = work_dir + "/" + "compiler.out";
@@ -94,12 +107,12 @@ JudgeWrapper::compile(CompileConfig *compile_config, const std::string &src_path
     ret.error = result.error;
 
     if (result.result != SUCCESS) {
-        ret.msg = "Compile failed";
+        ret.content = "Compile failed";
         return ret;
     }
     else {
         if (!std::filesystem::exists(compiler_out)) {
-            sprintf(ret.msg.data(), "Failed to read compiler_out file,err = %s",
+            sprintf(ret.content.data(), "Failed to read compiler_out file,err = %s",
                     "compiler_out file not exists");
             return ret;
         }
@@ -107,10 +120,10 @@ JudgeWrapper::compile(CompileConfig *compile_config, const std::string &src_path
         try {
             content = readFileContent(compiler_out);
         } catch (const std::exception &e) {
-            sprintf(ret.msg.data(), "Failed to read compiler_out file,err = %s", e.what());
+            sprintf(ret.content.data(), "Failed to read compiler_out file,err = %s", e.what());
             return ret;
         }
-        ret.msg = content;
+        ret.content = content;
         ret.exe_path = exe_path;
         return ret;
     }
