@@ -1,9 +1,7 @@
 CC  = gcc
 CXX = g++
-GCCVER := $(shell $(CC) -dumpversion | awk -F. '{ print $$1"."$$2}' )
 
 CFLAGS = -g -Wall -Werror -O3 -std=c99
-
 CXXFLAGS = -std=c++2a -Wall -g -pipe -rdynamic -fno-strict-aliasing -Wno-unused-function -Wno-sign-compare -fpermissive -Wno-invalid-offsetof
 CXXFLAGS += $(CFLAGS)
 
@@ -16,7 +14,7 @@ C_SRC += $(wildcard ./core/*.c) $(wildcard ./core/rules/*.c)
 CPP_SRC += $(wildcard ./common/*.cpp) $(wildcard ./judgeclient/*.cpp) $(wildcard ./wrapper/*.cpp)
 
 C_OBJ = $(patsubst %.c,%.o,$(C_SRC))
-CPP_OBJ = $(patsubst %.cpp,%.o,$(CSRC))
+CPP_OBJ = $(patsubst %.cpp,%.o,$(CPP_SRC))
 
 OBJ = $(C_OBJ) $(CPP_OBJ)
 
