@@ -3,7 +3,7 @@ GCCVER := $(shell $(CC) -dumpversion | awk -F. '{ print $$1"."$$2}' )
 
 CXXFLAGS = -std=c++2a -Wall -g -pipe -rdynamic -fno-strict-aliasing -Wno-unused-function -Wno-sign-compare -fpermissive -Wno-invalid-offsetof
 
-LIB = ./core/core.a
+LIB = ./core/libcore.a
 LINK = -lseccomp
 
 INC	+= -I./core -I./core/rules -I./wrapper -I./common -I./common/json -I./judgeclient
