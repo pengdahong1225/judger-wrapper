@@ -8,11 +8,11 @@ CXXFLAGS += $(CFLAGS)
 
 INC += -I./core -I./core/rules
 INC	+= -I./common -I./common/json -I./judgeclient -I./wrapper
-SRCS += $(wildcard ./core/*.c) $(wildcard ./core/rules/*.c)
-SRCS += $(wildcard ./common/*.cpp) $(wildcard ./judgeclient/*.cpp) $(wildcard ./wrapper/*.cpp)
+C_FILES += $(wildcard ./core/*.c) $(wildcard ./core/rules/*.c)
+CPP_FILES += $(wildcard ./common/*.cpp) $(wildcard ./judgeclient/*.cpp) $(wildcard ./wrapper/*.cpp)
 
-CPPOBJ = $(patsubst %.cpp,%.o,$(SRCS))
-COBJ += $(patsubst %.c,%.o,$(SRCS))
+CPPOBJ = $(patsubst %.cpp,%.o,$(CPP_FILES))
+COBJ += $(patsubst %.c,%.o,$(C_FILES))
 
 OBJ = $(CPPOBJ) $(COBJ)
 
