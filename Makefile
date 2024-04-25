@@ -6,7 +6,7 @@ CXXFLAGS += -lseccomp
 
 LIB += ./core/core.a
 
-INC	+= -I./common -I./common/json -I./judgeclient -I./wrapper
+INC	+= -I./common -I./common/json -I./judgeclient -I./wrapper -I./core
 CSRC += $(wildcard ./common/*.cpp) $(wildcard ./judgeclient/*.cpp) $(wildcard ./wrapper/*.cpp)
 
 OBJ = $(patsubst %.cpp,%.o,$(CSRC))
