@@ -22,7 +22,7 @@ JudgeClient::JudgeClient(struct RunConfig run_config, std::string exe_path, std:
     _load_test_case_info();
 }
 
-void JudgeClient::run(JudgeResultList &resultList) {
+void JudgeClient::judge(JudgeResultList &resultList) {
     // 循环运行测试用例
     auto &test_cases_arr = _test_case_info["test_cases"];
     for (int i = 0; i < test_cases_arr.size(); i++) {
@@ -111,7 +111,7 @@ JudgeResult JudgeClient::_judge_one(int test_case_file_id) {
             .gid = 0
     };
     struct result result{};
-    ::run(&cfg, &result);
+    run(&cfg, &result);
 
     // if progress exited normally, then we should check output result
     ret.code = result.result;

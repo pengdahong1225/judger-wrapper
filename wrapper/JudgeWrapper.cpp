@@ -17,7 +17,7 @@ JudgeResultList JudgeWrapper::judge(LangConfig *language_config, std::string &sr
     auto &compile_config = language_config->compile_config;
     auto &run_config = language_config->run_config;
     std::string work_dir = judger_dir + std::to_string(submission_id);
-    std::string log_path = work_dir + "/" + "run.log";
+    std::string log_path = work_dir + "/" + "judge.log";
     std::string test_case_dir = work_dir + "/" + "test_case";
 
     // TODO write source code into file
@@ -51,9 +51,9 @@ JudgeResultList JudgeWrapper::judge(LangConfig *language_config, std::string &sr
         return resultList;
     }
 
-    // TODO run
+    // TODO judge
     auto judger_client = new JudgeClient(run_config, compile_result.exe_path, log_path, test_case_dir, work_dir);
-    judger_client->run(resultList);
+    judger_client->judge(resultList);
     delete judger_client;
     return resultList;
 }
@@ -104,7 +104,7 @@ JudgeWrapper::compile(CompileConfig *compile_config, const std::string &src_path
             .gid = 0
     };
     struct result result{};
-    ::run(&cfg, &result);
+    run(&cfg, &result);
     ret.code = result.result;
     ret.cpu_time = result.cpu_time;
     ret.real_time = result.real_time;

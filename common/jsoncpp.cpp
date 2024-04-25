@@ -2573,7 +2573,7 @@ static inline char* duplicateAndPrefixStringValue(const char* value,
   *reinterpret_cast<unsigned*>(newString) = length;
   memcpy(newString + sizeof(unsigned), value, length);
   newString[actualLength - 1U] =
-      0; // to avoid buffer over-run accidents by users later
+      0; // to avoid buffer over-judge accidents by users later
   return newString;
 }
 inline static void decodePrefixedString(bool isPrefixed, char const* prefixed,

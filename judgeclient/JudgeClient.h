@@ -30,7 +30,7 @@ public:
                          std::string test_case_dir,
                          std::string work_dir,
                          std::string io_mode = standardIO);
-    void run(JudgeResultList &resultList);
+    void judge(JudgeResultList &resultList);
 private:
     void _load_test_case_info();
     JudgeResult _judge_one(int test_case_file_id);
