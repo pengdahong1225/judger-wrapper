@@ -5,7 +5,7 @@
 #include <fcntl.h>
 #include <stdbool.h>
 
-#include "../runner.h"
+#include "runner.h"
 
 
 int _c_cpp_seccomp_rules(struct config *_config, bool allow_write_file) {
