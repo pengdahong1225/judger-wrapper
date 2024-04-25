@@ -16,6 +16,9 @@ INC	+= -I./common -I./common/json -I./judgeclient -I./wrapper
 SRCS += $(wildcard ./core/*.c) $(wildcard ./core/rules/*.c)
 SRCS += $(wildcard ./common/*.cpp) $(wildcard ./judgeclient/*.cpp) $(wildcard ./wrapper/*.cpp)
 
+OBJ = $(patsubst %.cpp,%.o,$(SRCS))
+OBJ += $(patsubst %.c,%.o,$(SRCS))
+
 COMPILE_LIB_HOME = .
 DYNAMIC_NAME = libjudger.so
 STATIC_NAME = libjudger.a
@@ -24,10 +27,10 @@ STATIC_LIB = $(COMPILE_LIB_HOME)/$(STATIC_NAME)
 
 all: $(DYNAMIC_LIB) $(STATIC_LIB)
 
-$(DYNAMIC_LIB): $(SRCS:.c=.o)
-	$(CC) -pg -o $@ $^ $(CXXFLAGS)
+$(DYNAMIC_LIB): $(OBJ)
+	$(CXX) -pg -o $@ $^ $(CXXFLAGS)
 
-$(STATIC_LIB): $(SRCS:.c=.o)
+$(STATIC_LIB): $(OBJ)
 	@ar cr $@ $^
 
 %.o: %.c
