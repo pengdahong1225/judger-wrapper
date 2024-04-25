@@ -3,7 +3,6 @@ CXX = g++
 
 CFLAGS = -g -Wall -Werror -O3 -std=c99
 CXXFLAGS = -std=c++2a -Wall -g -pipe -rdynamic -fno-strict-aliasing -Wno-unused-function -Wno-sign-compare -fpermissive -Wno-invalid-offsetof
-CXXFLAGS += $(CFLAGS)
 
 #LIB = ./core/libcore.a
 LINK = -lseccomp # libseccomp是一个用于 Linux 系统的 syscall 过滤器库
