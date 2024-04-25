@@ -40,4 +40,4 @@ $(STATIC_LIB): $(OBJ)
 	$(CXX) $(CXXFLAGS) $(INC) -c -pg -o $@ $<
 
 clean:
-	rm -f *.o .po *.so *.d $(SRCS:.c=.o) $(SRCS:.c=.d) $(DYNAMIC_LIB) $(STATIC_LIB) $(DYNAMIC_NAME) $(STATIC_NAME)
+	rm -rf $(OBJ) $(DYNAMIC_LIB) $(STATIC_LIB) $(DYNAMIC_NAME) $(STATIC_NAME)
