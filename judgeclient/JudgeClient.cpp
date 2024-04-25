@@ -7,7 +7,7 @@
 #include <filesystem>
 
 #include "JudgeClient.h"
-#include "runner.h"
+#include "../core/runner.h"
 
 JudgeClient::JudgeClient(struct RunConfig run_config, std::string exe_path, std::string log_path,
                          std::string test_case_dir,
