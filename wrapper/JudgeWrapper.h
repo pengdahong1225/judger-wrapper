@@ -5,7 +5,6 @@
 #include <filesystem>
 #include <vector>
 
-#include "../core/runner.h"
 #include "../common/define.h"
 
 /*
