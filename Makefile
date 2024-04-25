@@ -2,12 +2,7 @@ CC  = gcc
 CXX = g++
 GCCVER := $(shell $(CC) -dumpversion | awk -F. '{ print $$1"."$$2}' )
 
-OPT = -pipe -fno-ident -fPIC -shared -z defs
-CFLAGS = $(OPT) -g -Wall -Werror -O3 -std=c99 -lseccomp # libseccomp是一个用于 Linux 系统的 syscall 过滤器库
-ifeq ($(MEMCHECK),1)
-CFLAGS += -DMEMCHECK
-endif
-
+CFLAGS += -g -O0 -Wall -fPIC -lseccomp # libseccomp是一个用于 Linux 系统的 syscall 过滤器库
 CXXFLAGS = -std=c++2a -Wall -g -pipe -rdynamic -fno-strict-aliasing -Wno-unused-function -Wno-sign-compare -fpermissive -Wno-invalid-offsetof
 CXXFLAGS += $(CFLAGS)
 
