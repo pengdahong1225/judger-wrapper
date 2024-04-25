@@ -3,6 +3,7 @@
 #include <iostream>
 #include "../common/json/json.h"
 #include "../judgeclient/JudgeClient.h"
+#include "../core/runner.h"
 
 /*
  * language_config：配置
