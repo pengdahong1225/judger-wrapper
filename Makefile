@@ -11,8 +11,10 @@ INC	+= -I./common -I./common/json -I./judgeclient -I./wrapper
 SRCS += $(wildcard ./core/*.c) $(wildcard ./core/rules/*.c)
 SRCS += $(wildcard ./common/*.cpp) $(wildcard ./judgeclient/*.cpp) $(wildcard ./wrapper/*.cpp)
 
-OBJ = $(patsubst %.cpp,%.o,$(SRCS))
-OBJ += $(patsubst %.c,%.o,$(SRCS))
+CPPOBJ = $(patsubst %.cpp,%.o,$(SRCS))
+COBJ += $(patsubst %.c,%.o,$(SRCS))
+
+OBJ = $(CPPOBJ) $(COBJ)
 
 COMPILE_LIB_HOME = .
 DYNAMIC_NAME = libjudger.so
