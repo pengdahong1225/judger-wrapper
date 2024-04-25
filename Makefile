@@ -3,8 +3,8 @@ GCCVER := $(shell $(CC) -dumpversion | awk -F. '{ print $$1"."$$2}' )
 
 CXXFLAGS = -std=c++2a -Wall -g -pipe -rdynamic -fno-strict-aliasing -Wno-unused-function -Wno-sign-compare -fpermissive -Wno-invalid-offsetof
 
+LIB = ./core/core.a
 LINK = -lseccomp
-LINK += -L./core -lcore
 
 INC	+= -I./core -I./core/rules -I./wrapper -I./common -I./common/json -I./judgeclient
 CSRC += $(wildcard ./common/*.cpp) $(wildcard ./judgeclient/*.cpp) $(wildcard ./wrapper/*.cpp)
@@ -20,7 +20,7 @@ STATIC_LIB = $(COMPILE_LIB_HOME)/$(STATIC_NAME)
 all: $(DYNAMIC_LIB) $(STATIC_LIB)
 
 $(DYNAMIC_LIB): $(OBJ)
-	$(CXX) -pg -o $@ $^ $(CXXFLAGS) $(LINK)
+	$(CXX) -pg -o $@ $^ $(LIB) $(CXXFLAGS) $(LINK)
 
 $(STATIC_LIB): $(OBJ)
 	@ar cr $@ $^
